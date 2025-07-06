@@ -1,0 +1,15 @@
+name: Build
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install dependencies
+        run: sudo apt install -y libreadline-dev
+      - name: Checkout repository content
+        uses: actions/checkout@v4
+      - name: Build
+        run: make
