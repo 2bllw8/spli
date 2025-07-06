@@ -1,1 +1,3 @@
-# leesp
+# SPLI
+
+C Lisp interpreter

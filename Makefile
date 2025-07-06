@@ -3,12 +3,19 @@
 
 CC     ?= gcc
 CFLAGS = -Wall -Werror
+LDLIBS = -lreadline
 
-%.o: %.c $(DEPS)
+DEPS = atom.o \
+       env.o \
+       eval.o \
+       io.o \
+       parser.o
+
+%.o: %.c %.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-main: main.o
-	$(CC) -o $@ $^ $(CFLAGS)
+main: main.o $(DEPS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LDLIBS)
 
 clean:
 	rm -f *.o main
