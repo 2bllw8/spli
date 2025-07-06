@@ -12,6 +12,7 @@ endif
 DEPS = atom.o \
        builtins.o \
        env.o \
+       err.o \
        eval.o \
        io.o \
        parser.o

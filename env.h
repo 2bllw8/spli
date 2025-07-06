@@ -10,7 +10,7 @@
 #include "err.h"
 
 struct atom env_create(struct atom parent);
-err_t env_get(struct atom env, struct atom symbol, struct atom *result);
-err_t env_set(struct atom env, struct atom symbol, struct atom value);
+error env_get(struct atom env, struct atom symbol, struct atom *result);
+error env_set(struct atom env, struct atom symbol, struct atom value);
 
 #endif

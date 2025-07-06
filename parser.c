@@ -3,24 +3,24 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#include "atom.h"
-#include "err.h"
 #include <stdlib.h>
 #include <string.h>
 
+#include "atom.h"
+#include "err.h"
 #include "parser.h"
 
 /**
  * Find the begin and end of the next token.
  */
-err_t lex_next_token(const char *s, const char **begin, const char **end)
+error lex_next_token(const char *s, const char **begin, const char **end)
 {
 	// Skip whitespace at the beginning
 	s += strspn(s, " \t\n");
 	if (s[0] == '\0') {
 		// Empty!
 		*begin = *end = NULL;
-		return err_syntax;
+		return err_syntax("EOL");
 	}
 
 	// prefix: "()"
@@ -30,7 +30,7 @@ err_t lex_next_token(const char *s, const char **begin, const char **end)
 	return err_ok;
 }
 
-int parse_simple(const char *begin, const char *end, struct atom *result)
+error parse_simple(const char *begin, const char *end, struct atom *result)
 {
 	char *p;
 	// Integer
@@ -56,7 +56,7 @@ int parse_simple(const char *begin, const char *end, struct atom *result)
 	return err_ok;
 }
 
-int parse_list(const char *begin, const char **end, struct atom *result)
+error parse_list(const char *begin, const char **end, struct atom *result)
 {
 	struct atom p = nil;
 	*result = nil;
@@ -65,8 +65,8 @@ int parse_list(const char *begin, const char **end, struct atom *result)
 	while (1) {
 		const char *token;
 		struct atom item;
-		err_t err = lex_next_token(*end, &token, end);
-		if (err) {
+		error err = lex_next_token(*end, &token, end);
+		if (err.type) {
 			return err;
 		}
 		if (token[0] == ')') {
@@ -74,21 +74,23 @@ int parse_list(const char *begin, const char **end, struct atom *result)
 		}
 		if (token[0] == '.' && *end - token == 1) {
 			if (is_nil(p)) {
-				return err_syntax;
+				return err_syntax("expected expression");
 			}
 			err = read_expr(*end, end, &item);
-			if (err) {
+			if (err.type) {
 				return err;
 			}
 			cdr(p) = item;
 
 			// Expected end of list
 			err = lex_next_token(*end, &token, end);
-			return err || token[0] == ')' ? err : err_syntax;
+			return err.type || token[0] == ')' ?
+				       err :
+				       err_syntax("missing expected )");
 		}
 
 		err = read_expr(token, end, &item);
-		if (err) {
+		if (err.type) {
 			return err;
 		}
 		if (is_nil(p)) {
@@ -103,18 +105,18 @@ int parse_list(const char *begin, const char **end, struct atom *result)
 	}
 }
 
-err_t read_expr(const char *input, const char **end, struct atom *result)
+error read_expr(const char *input, const char **end, struct atom *result)
 {
 	const char *token;
-	err_t err = lex_next_token(input, &token, end);
-	if (err) {
+	error err = lex_next_token(input, &token, end);
+	if (err.type) {
 		return err;
 	}
 	switch (token[0]) {
 	case '(':
 		return parse_list(*end, end, result);
 	case ')':
-		return err_syntax;
+		return err_syntax("Unexpected )");
 	default:
 		return parse_simple(token, *end, result);
 	}

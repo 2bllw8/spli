@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "atom.h"
+#include "err.h"
 
 struct atom cons(struct atom car_val, struct atom cdr_val)
 {

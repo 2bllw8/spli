@@ -26,7 +26,7 @@ struct atom env_create(struct atom parent)
 	return cons(parent, nil);
 }
 
-err_t env_get(struct atom env, struct atom symbol, struct atom *result)
+error env_get(struct atom env, struct atom symbol, struct atom *result)
 {
 	struct atom parent = car(env);
 	struct atom bs = cdr(env);
@@ -42,10 +42,12 @@ err_t env_get(struct atom env, struct atom symbol, struct atom *result)
 	}
 
 	// Look up the symbol in the parent env
-	return is_nil(parent) ? err_not_bound : env_get(parent, symbol, result);
+	return is_nil(parent)
+		? err_not_bound(symbol.value.symbol)
+		: env_get(parent, symbol, result);
 }
 
-err_t env_set(struct atom env, struct atom symbol, struct atom value)
+error env_set(struct atom env, struct atom symbol, struct atom value)
 {
 	struct atom bs = cdr(env);
 	struct atom b = nil;

@@ -12,6 +12,6 @@
 /**
  * Parse the input to read an expression.
  */
-err_t read_expr(const char *input, const char **end, struct atom *result);
+error read_expr(const char *input, const char **end, struct atom *result);
 
 #endif

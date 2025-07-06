@@ -32,26 +32,17 @@ int main(int argc, char **argv)
 		const char *p = input;
 		struct atom expr;
 		struct atom result;
-		err_t err = read_expr(p, &p, &expr);
-		if (!err) {
+		error err = read_expr(p, &p, &expr);
+		if (!err.type) {
 			err = eval_expr(env, expr, &result);
 		}
-		switch (err) {
-		case err_ok:
+		switch (err.type) {
+		case err_t_ok:
 			print_expr(result);
 			putchar('\n');
 			break;
-		case err_syntax:
-			puts("Syntax error!");
-			break;
-		case err_not_bound:
-			puts("Symbol not bound");
-			break;
-		case err_args:
-			puts("Wrong number of arguments");
-			break;
-		case err_type:
-			puts("Wrong type");
+		default:
+			puts(err.message);
 			break;
 		}
 	}

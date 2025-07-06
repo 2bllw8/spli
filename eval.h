@@ -9,6 +9,6 @@
 #include "atom.h"
 #include "err.h"
 
-err_t eval_expr(struct atom env, struct atom atom, struct atom *result);
+error eval_expr(struct atom env, struct atom atom, struct atom *result);
 
 #endif

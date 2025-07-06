@@ -9,13 +9,13 @@
 #include "atom.h"
 #include "err.h"
 
-int builtin_car(struct atom args, struct atom *result);
-int builtin_cdr(struct atom args, struct atom *result);
-int builtin_cons(struct atom args, struct atom *result);
+error builtin_car(struct atom args, struct atom *result);
+error builtin_cdr(struct atom args, struct atom *result);
+error builtin_cons(struct atom args, struct atom *result);
 
-int builtin_add(struct atom args, struct atom *result);
-int builtin_sub(struct atom args, struct atom *result);
-int builtin_mul(struct atom args, struct atom *result);
-int builtin_div(struct atom args, struct atom *result);
+error builtin_add(struct atom args, struct atom *result);
+error builtin_sub(struct atom args, struct atom *result);
+error builtin_mul(struct atom args, struct atom *result);
+error builtin_div(struct atom args, struct atom *result);
 
 #endif

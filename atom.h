@@ -8,9 +8,11 @@
 
 #include <stdbool.h>
 
+#include "err.h"
+
 struct atom;
 
-typedef int (*builtin_function)(struct atom args, struct atom *result);
+typedef error (*builtin_function)(struct atom args, struct atom *result);
 
 struct atom {
 	enum {
