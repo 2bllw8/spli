@@ -13,4 +13,9 @@ int builtin_car(struct atom args, struct atom *result);
 int builtin_cdr(struct atom args, struct atom *result);
 int builtin_cons(struct atom args, struct atom *result);
 
+int builtin_add(struct atom args, struct atom *result);
+int builtin_sub(struct atom args, struct atom *result);
+int builtin_mul(struct atom args, struct atom *result);
+int builtin_div(struct atom args, struct atom *result);
+
 #endif

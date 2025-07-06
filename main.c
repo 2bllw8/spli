@@ -18,9 +18,15 @@ int main(int argc, char **argv)
 {
 	char *input;
 	struct atom env = env_create(nil);
+
 	env_set(env, make_sym("car"), make_builtin(builtin_car));
 	env_set(env, make_sym("cdr"), make_builtin(builtin_cdr));
 	env_set(env, make_sym("cons"), make_builtin(builtin_cons));
+
+	env_set(env, make_sym("+"), make_builtin(builtin_add));
+	env_set(env, make_sym("-"), make_builtin(builtin_sub));
+	env_set(env, make_sym("*"), make_builtin(builtin_mul));
+	env_set(env, make_sym("/"), make_builtin(builtin_div));
 
 	while ((input = readline("> ")) != NULL) {
 		const char *p = input;

@@ -44,6 +44,7 @@ static const struct atom nil = {
 struct atom cons(struct atom car_val, struct atom cdr_val);
 struct atom make_sym(const char *s);
 struct atom make_builtin(builtin_function f);
+struct atom make_integer(long integer);
 
 bool is_list(struct atom expr);
 

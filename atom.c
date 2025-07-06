@@ -53,13 +53,11 @@ struct atom make_builtin(builtin_function f)
 	return a;
 }
 
-bool is_list(struct atom expr)
+struct atom make_integer(long integer)
 {
-	while (!is_nil(expr)) {
-		if (expr.type != atom_t_list) {
-			return false;
-		}
-		expr = cdr(expr);
-	}
-	return true;
+	struct atom a = {
+		.type = atom_t_integer,
+		.value.integer = integer,
+	};
+	return a;
 }
