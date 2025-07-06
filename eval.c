@@ -40,8 +40,41 @@ struct atom copy_list(struct atom list)
 
 error apply(struct atom f, struct atom args, struct atom *result)
 {
-	return f.type == atom_t_builtin ? (*f.value.builtin)(args, result) :
-					  err_type;
+	if (f.type == atom_t_builtin) {
+		return (*f.value.builtin)(args, result);
+	}
+	if (f.type != atom_t_closure) {
+		return err_type("cannot apply something that is not a closure");
+	}
+
+	// (env (params...) expr...)
+	struct atom env = env_create(car(f));
+	struct atom params = car(cdr(f));
+	struct atom body = cdr(cdr(f));
+
+	// Bind the arguments
+	while (!is_nil(params)) {
+		if (is_nil(args)) {
+			// Mismatched count
+			return err_args("missing arguments");
+		}
+		env_set(env, car(params), car(args));
+		params = cdr(params);
+		args = cdr(args);
+	}
+	if (!is_nil(args)) {
+		// More args than parameters
+		return err_args("too many arguments");
+	}
+	// Evaluate the body
+	while (!is_nil(body)) {
+		error err = eval_expr(env, car(body), result);
+		if (err.type) {
+			return err;
+		}
+		body = cdr(body);
+	}
+	return err_ok;
 }
 
 error eval_list(struct atom env, struct atom expr, struct atom *result)

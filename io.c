@@ -40,5 +40,8 @@ void print_expr(struct atom atom)
 	case atom_t_builtin:
 		printf("#builtin@%p", atom.value.builtin);
 		break;
+	case atom_t_closure:
+		printf("#closure@%p", atom.value.list);
+		break;
 	}
 }

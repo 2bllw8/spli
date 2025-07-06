@@ -62,3 +62,38 @@ struct atom make_integer(long integer)
 	};
 	return a;
 }
+
+error make_closure(struct atom env, struct atom args, struct atom body,
+		 struct atom *result)
+{
+	if (!is_list(args)) {
+		return err_syntax("args: must be a list");
+	}
+	if (!is_list(body)) {
+		return err_syntax("body: must not be a list");
+	}
+
+	// All args must be symbols
+	struct atom p = args;
+	while (!is_nil(p)) {
+		if (car(p).type != atom_t_symbol) {
+			return err_type("arg must be a symbol");
+		}
+		p = cdr(p);
+	}
+
+	*result = cons(env, cons(args, body));
+	result->type = atom_t_closure;
+	return err_ok;
+}
+
+bool is_list(struct atom expr)
+{
+	while (!is_nil(expr)) {
+		if (expr.type != atom_t_list) {
+			return false;
+		}
+		expr = cdr(expr);
+	}
+	return true;
+}
