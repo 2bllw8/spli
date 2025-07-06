@@ -44,6 +44,15 @@ struct atom make_sym(const char *s)
 	return a;
 }
 
+struct atom make_builtin(builtin_function f)
+{
+	struct atom a = {
+		.type = atom_t_builtin,
+		.value.builtin = f,
+	};
+	return a;
+}
+
 bool is_list(struct atom expr)
 {
 	while (!is_nil(expr)) {

@@ -3,12 +3,14 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#include "eval.h"
 #include <stdio.h>
 #include <readline/readline.h>
 
-#include "err.h"
+#include "atom.h"
+#include "builtins.h"
 #include "env.h"
+#include "err.h"
+#include "eval.h"
 #include "io.h"
 #include "parser.h"
 
@@ -16,6 +18,9 @@ int main(int argc, char **argv)
 {
 	char *input;
 	struct atom env = env_create(nil);
+	env_set(env, make_sym("car"), make_builtin(builtin_car));
+	env_set(env, make_sym("cdr"), make_builtin(builtin_cdr));
+	env_set(env, make_sym("cons"), make_builtin(builtin_cons));
 
 	while ((input = readline("> ")) != NULL) {
 		const char *p = input;

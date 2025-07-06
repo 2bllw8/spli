@@ -5,7 +5,12 @@ CC     ?= gcc
 CFLAGS = -Wall -Werror
 LDLIBS = -lreadline
 
+ifeq ($(DEBUG),true)
+CFLAGS += --enable-checking -g -O0 -fsanitize=address
+endif
+
 DEPS = atom.o \
+       builtins.o \
        env.o \
        eval.o \
        io.o \

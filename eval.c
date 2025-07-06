@@ -21,6 +21,29 @@ err_t eval_itself(struct atom expr, struct atom *result)
 	return err_ok;
 }
 
+struct atom copy_list(struct atom list)
+{
+	if (is_nil(list)) {
+		return nil;
+	}
+
+	struct atom a = cons(car(list), nil);
+	struct atom p = a;
+	list = cdr(list);
+	while (!is_nil(list)) {
+		cdr(p) = cons(car(list), nil);
+		p = cdr(p);
+		list = cdr(list);
+	}
+	return a;
+}
+
+err_t apply(struct atom f, struct atom args, struct atom *result)
+{
+	return f.type == atom_t_builtin ? (*f.value.builtin)(args, result) :
+					  err_type;
+}
+
 err_t eval_list(struct atom env, struct atom expr, struct atom *result)
 {
 	struct atom op = car(expr);
@@ -53,7 +76,25 @@ err_t eval_list(struct atom env, struct atom expr, struct atom *result)
 			return err_ok;
 		}
 	}
-	return err_syntax;
+
+	// Eval operator
+	err_t err = eval_expr(env, op, &op);
+	if (err) {
+		return err;
+	}
+
+	// Eval args
+	args = copy_list(cdr(expr));
+	struct atom p = args;
+	while (!is_nil(p)) {
+		err = eval_expr(env, car(p), &car(p));
+		if (err) {
+			return err;
+		}
+		p = cdr(p);
+	}
+
+	return apply(op, args, result);
 }
 
 err_t eval_expr(struct atom env, struct atom expr, struct atom *result)
@@ -63,6 +104,7 @@ err_t eval_expr(struct atom env, struct atom expr, struct atom *result)
 		return eval_symbol(env, expr, result);
 	case atom_t_list:
 		return eval_list(env, expr, result);
+	case atom_t_builtin:
 	case atom_t_nil:
 	case atom_t_integer:
 		return eval_itself(expr, result);

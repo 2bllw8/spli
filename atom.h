@@ -8,11 +8,22 @@
 
 #include <stdbool.h>
 
+struct atom;
+
+typedef int (*builtin_function)(struct atom args, struct atom *result);
+
 struct atom {
-	enum { atom_t_nil, atom_t_list, atom_t_symbol, atom_t_integer } type;
+	enum {
+		atom_t_nil,
+		atom_t_list,
+		atom_t_symbol,
+		atom_t_builtin,
+		atom_t_integer,
+	} type;
 	union {
 		struct list *list;
 		const char *symbol;
+		builtin_function builtin;
 		long integer;
 	} value;
 };
@@ -20,6 +31,7 @@ struct atom {
 struct list {
 	struct atom atom[2];
 };
+
 
 #define car(p) ((p).value.list->atom[0])
 #define cdr(p) ((p).value.list->atom[1])
@@ -31,6 +43,7 @@ static const struct atom nil = {
 
 struct atom cons(struct atom car_val, struct atom cdr_val);
 struct atom make_sym(const char *s);
+struct atom make_builtin(builtin_function f);
 
 bool is_list(struct atom expr);
 

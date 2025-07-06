@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+#include "atom.h"
 #include <stdio.h>
 
 #include "io.h"
@@ -35,6 +36,9 @@ void print_expr(struct atom atom)
 		break;
 	case atom_t_integer:
 		printf("%ld", atom.value.integer);
+		break;
+	case atom_t_builtin:
+		printf("#builtin@%p", atom.value.builtin);
 		break;
 	}
 }
