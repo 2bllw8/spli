@@ -23,10 +23,10 @@ error lex_next_token(const char *s, const char **begin, const char **end)
 		return err_syntax("EOL");
 	}
 
-	// prefix: "()"
+	// prefix: "()'"
 	// delim:  "() \t\n"
 	*begin = s;
-	*end = s + (strchr("()", s[0]) == NULL ? strcspn(s, "() \t\n") : 1);
+	*end = s + (strchr("()'", s[0]) == NULL ? strcspn(s, "() \t\n") : 1);
 	return err_ok;
 }
 
@@ -105,6 +105,12 @@ error parse_list(const char *begin, const char **end, struct atom *result)
 	}
 }
 
+error parse_quote(const char **end, struct atom *result)
+{
+	*result = cons(make_sym("quote"), cons(nil, nil));
+	return read_expr(*end, end, &car(cdr(*result)));
+}
+
 error read_expr(const char *input, const char **end, struct atom *result)
 {
 	const char *token;
@@ -117,6 +123,8 @@ error read_expr(const char *input, const char **end, struct atom *result)
 		return parse_list(*end, end, result);
 	case ')':
 		return err_syntax("Unexpected )");
+	case '\'':
+		return parse_quote(end, result);
 	default:
 		return parse_simple(token, *end, result);
 	}
