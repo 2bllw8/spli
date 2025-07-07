@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <readline/readline.h>
+#include <readline/history.h>
 
 #include "atom.h"
 #include "builtins.h"
@@ -36,6 +37,7 @@ int main(int argc, char **argv)
 	env_set(env, make_sym("<"), make_builtin(builtin_integer_gt));
 
 	while ((input = readline("> ")) != NULL) {
+		add_history(input);
 		const char *p = input;
 		struct atom expr;
 		struct atom result;
