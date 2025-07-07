@@ -28,6 +28,13 @@ int main(int argc, char **argv)
 	env_set(env, make_sym("*"), make_builtin(builtin_mul));
 	env_set(env, make_sym("/"), make_builtin(builtin_div));
 
+	env_set(env, make_sym("#t"), make_sym("#t"));
+	env_set(env, make_sym("#f"), nil);
+	env_set(env, make_sym("not"), make_builtin(builtin_not));
+	env_set(env, make_sym("="), make_builtin(builtin_integer_eq));
+	env_set(env, make_sym(">"), make_builtin(builtin_integer_lt));
+	env_set(env, make_sym("<"), make_builtin(builtin_integer_gt));
+
 	while ((input = readline("> ")) != NULL) {
 		const char *p = input;
 		struct atom expr;

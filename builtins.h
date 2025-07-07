@@ -18,4 +18,10 @@ error builtin_sub(struct atom args, struct atom *result);
 error builtin_mul(struct atom args, struct atom *result);
 error builtin_div(struct atom args, struct atom *result);
 
+error builtin_not(struct atom args, struct atom *result);
+
+error builtin_integer_eq(struct atom args, struct atom *result);
+error builtin_integer_gt(struct atom args, struct atom *result);
+error builtin_integer_lt(struct atom args, struct atom *result);
+
 #endif

@@ -77,6 +77,57 @@ error apply(struct atom f, struct atom args, struct atom *result)
 	return err_ok;
 }
 
+error eval_define(struct atom env, struct atom args, struct atom *result)
+{
+	if (is_nil(args) || is_nil(cdr(args)) || !is_nil(cdr(cdr(args)))) {
+		return err_args("define expects 1 symbol and 1 expression");
+	}
+	struct atom sym = car(args);
+	if (sym.type != atom_t_symbol) {
+		return err_type("first argument of define must be a symbol");
+	}
+	struct atom value;
+	error err = eval_expr(env, car(cdr(args)), &value);
+	if (err.type) {
+		return err;
+	}
+	*result = sym;
+	return env_set(env, sym, value);
+}
+
+error eval_quote(struct atom args, struct atom *result)
+{
+	if (is_nil(args) || !is_nil(cdr(args))) {
+		return err_args("quote expects 1 argument");
+	}
+	*result = car(args);
+	return err_ok;
+}
+
+error eval_lambda(struct atom env, struct atom args, struct atom *result)
+{
+	if (is_nil(args) || is_nil(cdr(args))) {
+		return err_args("lambda expects 2 arguments");
+	}
+	return make_closure(env, car(args), cdr(args), result);
+}
+
+error eval_if(struct atom env, struct atom args, struct atom *result)
+{
+	if (is_nil(args) || is_nil(cdr(args)) || is_nil(cdr(cdr(args))) ||
+	    !is_nil(cdr(cdr(cdr(args))))) {
+		return err_args("if expects 3 arguments");
+	}
+	struct atom cond;
+	error err = eval_expr(env, car(args), &cond);
+	if (err.type) {
+		return err;
+	}
+	struct atom branch = is_nil(cond) ? car(cdr(cdr(args))) :
+					    car(cdr(args));
+	return eval_expr(env, branch, result);
+}
+
 error eval_list(struct atom env, struct atom expr, struct atom *result)
 {
 	struct atom op = car(expr);
@@ -84,38 +135,15 @@ error eval_list(struct atom env, struct atom expr, struct atom *result)
 
 	if (op.type == atom_t_symbol) {
 		if (strcmp(op.value.symbol, "define") == 0) {
-			// define
-			if (is_nil(args) || is_nil(cdr(args)) ||
-			    !is_nil(cdr(cdr(args)))) {
-				return err_args(
-					"define expects 1 symbol and 1 expression");
-			}
-			struct atom sym = car(args);
-			if (sym.type != atom_t_symbol) {
-				return err_type(
-					"first argument of define must be a symbol");
-			}
-			struct atom value;
-			error err = eval_expr(env, car(cdr(args)), &value);
-			if (err.type) {
-				return err;
-			}
-			*result = sym;
-			return env_set(env, sym, value);
+			return eval_define(env, args, result);
 		} else if (strcmp(op.value.symbol, "quote") == 0) {
-			// quote
-			if (is_nil(args) || !is_nil(cdr(args))) {
-				return err_args("quote expects 1 argument");
-			}
-			*result = car(args);
-			return err_ok;
+			return eval_quote(args, result);
 		} else if (strcmp(op.value.symbol, "λ") == 0 ||
 			   strcmp(op.value.symbol, "\\") == 0 ||
 			   strcmp(op.value.symbol, "lambda") == 0) {
-			if (is_nil(args) || is_nil(cdr(args))) {
-				return err_args("lambda expects 2 arguments");
-			}
-			return make_closure(env, car(args), cdr(args), result);
+			return eval_lambda(env, args, result);
+		} else if (strcmp(op.value.symbol, "if") == 0) {
+			return eval_if(env, args, result);
 		}
 	}
 

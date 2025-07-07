@@ -63,7 +63,7 @@ error builtin_cons(struct atom args, struct atom *result)
 				a.value.integer op b.value.integer);        \
 			return err_ok;                                      \
 		} else {                                                    \
-			return err_type("binary op takes two integers");    \
+			return err_type("binary op takes 2 integers");      \
 		}                                                           \
 	} while (0)
 
@@ -86,3 +86,48 @@ error builtin_div(struct atom args, struct atom *result)
 {
 	bin_op(/, args, result);
 }
+
+#undef bin_op
+
+error builtin_not(struct atom args, struct atom *result)
+{
+	if (is_nil(args)) {
+		return err_args("unary not expects 1 argument");
+	}
+	*result = is_nil(car(args)) ? make_sym("#t") : nil;
+	return err_ok;
+}
+
+#define integer_cmp(op, args, result)                                       \
+	do {                                                                \
+		if (is_nil((args)) || is_nil(cdr((args))) ||                \
+		    !is_nil(cdr(cdr((args))))) {                            \
+			return err_args(                                    \
+				"integer comparison expects 2 arguments");  \
+		}                                                           \
+		struct atom a = car((args));                                \
+		struct atom b = car(cdr((args)));                           \
+		if (a.type == atom_t_integer && b.type == atom_t_integer) { \
+			*(result) = (a.value.integer op b.value.integer) ?  \
+					    make_sym("#t") :                \
+					    nil;                            \
+			return err_ok;                                      \
+		}                                                           \
+		return err_type("integer comparison takes 2 integers");     \
+	} while (0)
+
+error builtin_integer_eq(struct atom args, struct atom *result)
+{
+	integer_cmp(==, args, result);
+}
+
+error builtin_integer_gt(struct atom args, struct atom *result)
+{
+	integer_cmp(>, args, result);
+}
+error builtin_integer_lt(struct atom args, struct atom *result)
+{
+	integer_cmp(<, args, result);
+}
+
+#undef integer_cmp
