@@ -79,17 +79,28 @@ error apply(struct atom f, struct atom args, struct atom *result)
 
 error eval_define(struct atom env, struct atom args, struct atom *result)
 {
-	if (is_nil(args) || is_nil(cdr(args)) || !is_nil(cdr(cdr(args)))) {
-		return err_args("define expects 1 symbol and 1 expression");
+	if (is_nil(args) || is_nil(cdr(args))) {
+		return err_args("define expects at least 2 arguments");
 	}
 	struct atom sym = car(args);
-	if (sym.type != atom_t_symbol) {
-		return err_type("first argument of define must be a symbol");
-	}
 	struct atom value;
-	error err = eval_expr(env, car(cdr(args)), &value);
-	if (err.type) {
-		return err;
+	if (sym.type == atom_t_list) {
+		error err = make_closure(env, cdr(sym), cdr(args), &value);
+		if (err.type) {
+			return err;
+		}
+		sym = car(sym);
+		if (sym.type != atom_t_symbol) {
+			return err_type("missing body of function definition");
+		}
+	} else if (sym.type == atom_t_symbol) {
+		if (!is_nil(cdr(cdr(args)))) {
+			return err_args("symbol define expects 2 arguments");
+		}
+		error err = eval_expr(env, car(cdr(args)), &value);
+		if (err.type) {
+			return err;
+		}
 	}
 	*result = sym;
 	return env_set(env, sym, value);
