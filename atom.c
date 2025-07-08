@@ -64,22 +64,23 @@ struct atom make_integer(long integer)
 }
 
 error make_closure(struct atom env, struct atom args, struct atom body,
-		 struct atom *result)
+		   struct atom *result)
 {
-	if (!is_list(args)) {
-		return err_syntax("args: must be a list");
-	}
 	if (!is_list(body)) {
 		return err_syntax("body: must not be a list");
 	}
 
-	// All args must be symbols
+	// All args names must be symbols
 	struct atom p = args;
 	while (!is_nil(p)) {
-		if (car(p).type != atom_t_symbol) {
-			return err_type("arg must be a symbol");
+		if (p.type == atom_t_symbol) {
+			break;
+		} else if (p.type != atom_t_list ||
+			   car(p).type != atom_t_symbol) {
+			return err_type("arg name must be a symbol");
+		} else {
+			p = cdr(p);
 		}
-		p = cdr(p);
 	}
 
 	*result = cons(env, cons(args, body));

@@ -54,6 +54,11 @@ error apply(struct atom f, struct atom args, struct atom *result)
 
 	// Bind the arguments
 	while (!is_nil(params)) {
+		if (params.type == atom_t_symbol) {
+			env_set(env, params, args);
+			args = nil;
+			break;
+		}
 		if (is_nil(args)) {
 			// Mismatched count
 			return err_args("missing arguments");
