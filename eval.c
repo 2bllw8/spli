@@ -144,6 +144,41 @@ error eval_if(struct atom env, struct atom args, struct atom *result)
 	return eval_expr(env, branch, result);
 }
 
+error eval_defmacro(struct atom env, struct atom args, struct atom *result)
+{
+	if (is_nil(args) || is_nil(cdr(args))) {
+		return err_args("defmacro expects at least 2 arguments");
+	}
+	if (car(args).type != atom_t_list) {
+		return err_type("first argument of defmacro must be a list");
+	}
+
+	struct atom name = car(car(args));
+	if (name.type != atom_t_symbol) {
+		return err_args("name of defmacro is not a symbol");
+	}
+	struct atom macro;
+	error err = make_closure(env, cdr(car(args)), cdr(args), &macro);
+	if (err.type) {
+		return err;
+	}
+	macro.type = atom_t_macro;
+	*result = name;
+	return env_set(env, name, macro);
+}
+
+error eval_macro(struct atom env, struct atom op, struct atom args,
+		 struct atom *result)
+{
+	struct atom expansion;
+	op.type = atom_t_closure;
+	error err = apply(op, args, &expansion);
+	if (err.type) {
+		return err;
+	}
+	return eval_expr(env, expansion, result);
+}
+
 error eval_list(struct atom env, struct atom expr, struct atom *result)
 {
 	struct atom op = car(expr);
@@ -160,6 +195,8 @@ error eval_list(struct atom env, struct atom expr, struct atom *result)
 			return eval_lambda(env, args, result);
 		} else if (strcmp(op.value.symbol, "if") == 0) {
 			return eval_if(env, args, result);
+		} else if (strcmp(op.value.symbol, "defmacro") == 0) {
+			return eval_defmacro(env, args, result);
 		}
 	}
 
@@ -167,6 +204,11 @@ error eval_list(struct atom env, struct atom expr, struct atom *result)
 	error err = eval_expr(env, op, &op);
 	if (err.type) {
 		return err;
+	}
+
+	// Eval macro
+	if (op.type == atom_t_macro) {
+		return eval_macro(env, op, args, result);
 	}
 
 	// Eval args
@@ -189,6 +231,7 @@ error eval_expr(struct atom env, struct atom expr, struct atom *result)
 	case atom_t_symbol:
 		return eval_symbol(env, expr, result);
 	case atom_t_list:
+	case atom_t_macro:
 		return eval_list(env, expr, result);
 	case atom_t_builtin:
 	case atom_t_nil:

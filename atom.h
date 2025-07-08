@@ -21,6 +21,7 @@ struct atom {
 		atom_t_closure,
 		atom_t_integer,
 		atom_t_list,
+		atom_t_macro,
 		atom_t_symbol,
 	} type;
 	union {

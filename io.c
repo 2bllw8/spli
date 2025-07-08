@@ -32,6 +32,7 @@ void print_expr(struct atom atom)
 		putchar(')');
 		break;
 	case atom_t_symbol:
+	case atom_t_macro:
 		printf("%s", atom.value.symbol);
 		break;
 	case atom_t_integer:
