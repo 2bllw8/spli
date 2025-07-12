@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "io.h"
@@ -42,6 +43,9 @@ void print_expr(FILE *file, struct atom atom)
 		break;
 	case atom_t_closure:
 		fprintf(file, "#closure@%p", atom.value.list);
+		break;
+	default:
+		fprintf(stderr, "? (%d)", atom.type);
 		break;
 	}
 }

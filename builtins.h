@@ -19,7 +19,8 @@ error builtin_div(struct atom args, struct atom *result);
 
 error builtin_not(struct atom args, struct atom *result);
 
-error builtin_same(struct atom args, struct atom *result);
+error builtin_are_same(struct atom args, struct atom *result);
+error builtin_is_list(struct atom args, struct atom *result);
 
 error builtin_integer_eq(struct atom args, struct atom *result);
 error builtin_integer_gt(struct atom args, struct atom *result);

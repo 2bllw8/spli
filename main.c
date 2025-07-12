@@ -61,7 +61,8 @@ void init_env(struct atom env)
 
 	env_set(env, make_sym("apply"), make_builtin(builtin_apply));
 
-	env_set(env, make_sym("are-same"), make_builtin(builtin_same));
+	env_set(env, make_sym("are-same"), make_builtin(builtin_are_same));
+	env_set(env, make_sym("is-list"), make_builtin(builtin_is_list));
 
 	load_file(env, "init.lisp");
 }

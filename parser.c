@@ -19,14 +19,18 @@ error lex_next_token(const char *s, const char **begin, const char **end)
 	s += strspn(s, " \t\n");
 	if (s[0] == '\0') {
 		// Empty!
-		*begin = *end = NULL;
+		*begin = NULL;
+		*end = NULL;
 		return err_syntax("EOL");
 	}
 
 	// prefix: "()'"
 	// delim:  "() \t\n"
 	*begin = s;
-	*end = s + (strchr("()'", s[0]) == NULL ? strcspn(s, "() \t\n") : 1);
+	*end = s + (strchr("()'`", s[0]) != NULL ?
+			    1 :
+			    (s[0] == ',' ? (s[1] == '@' ? 2 : 1) :
+					   strcspn(s, "() \t\n")));
 	return err_ok;
 }
 
@@ -111,6 +115,20 @@ error parse_quote(const char **end, struct atom *result)
 	return read_expr(*end, end, &car(cdr(*result)));
 }
 
+error parse_quasiquote(const char *begin, const char **end, struct atom *result)
+{
+	*result = cons(make_sym("quasiquote"), cons(nil, nil));
+	return read_expr(begin, end, &car(cdr(*result)));
+}
+
+error parse_unquote(bool is_splicing, const char *begin, const char **end,
+		    struct atom *result)
+{
+	*result = cons(make_sym(is_splicing ? "unquote-splicing" : "unquote"),
+		       cons(nil, nil));
+	return read_expr(begin, end, &car(cdr(*result)));
+}
+
 error read_expr(const char *input, const char **end, struct atom *result)
 {
 	const char *token;
@@ -125,6 +143,10 @@ error read_expr(const char *input, const char **end, struct atom *result)
 		return err_syntax("Unexpected )");
 	case '\'':
 		return parse_quote(end, result);
+	case '`':
+		return parse_quasiquote(*end, end, result);
+	case ',':
+		return parse_unquote(token[1] == '@', *end, end, result);
 	default:
 		return parse_simple(token, *end, result);
 	}

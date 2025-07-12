@@ -99,7 +99,7 @@ error builtin_not(struct atom args, struct atom *result)
 	return err_ok;
 }
 
-error builtin_same(struct atom args, struct atom *result)
+error builtin_are_same(struct atom args, struct atom *result)
 {
 	if (is_nil(args) || is_nil(cdr(args)) || !is_nil(cdr(cdr(args)))) {
 		return err_args("same expects 2 arguments");
@@ -137,6 +137,17 @@ error builtin_same(struct atom args, struct atom *result)
 	}
 
 	*result = are_eq ? make_sym("#t") : nil;
+	return err_ok;
+}
+
+
+error builtin_is_list(struct atom args, struct atom *result)
+{
+	if (is_nil(args) || !is_nil(cdr(args))) {
+		return err_args("is-list expects 1 argument");
+	}
+
+	*result = (car(args).type == atom_t_list) ? make_sym("#t") : nil;
 	return err_ok;
 }
 
