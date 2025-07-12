@@ -14,12 +14,35 @@
 #include "eval.h"
 #include "io.h"
 #include "parser.h"
+#include <stdlib.h>
 
-int main(int argc, char **argv)
+void load_file(struct atom env, const char *path)
 {
-	char *input;
-	struct atom env = env_create(nil);
+	char *content = read_file(path);
+	if (!content) {
+		return;
+	}
 
+	const char *p = content;
+	struct atom expr;
+	while (read_expr(p, &p, &expr).type == 0) {
+		struct atom result;
+		error err = eval_expr(env, expr, &result);
+		if (err.type) {
+			fprintf(stderr, "Error in expression:\n\t");
+			print_expr(stderr, result);
+			fprintf(stderr, "\n");
+		} else {
+			print_expr(stdout, result);
+			fprintf(stdout, "\n");
+		}
+	}
+
+	free(content);
+}
+
+void init_env(struct atom env)
+{
 	env_set(env, make_sym("car"), make_builtin(builtin_car));
 	env_set(env, make_sym("cdr"), make_builtin(builtin_cdr));
 	env_set(env, make_sym("cons"), make_builtin(builtin_cons));
@@ -36,6 +59,15 @@ int main(int argc, char **argv)
 	env_set(env, make_sym(">"), make_builtin(builtin_integer_lt));
 	env_set(env, make_sym("<"), make_builtin(builtin_integer_gt));
 
+	load_file(env, "init.lisp");
+}
+
+int main(int argc, char **argv)
+{
+	char *input;
+	struct atom env = env_create(nil);
+	init_env(env);
+
 	while ((input = readline("> ")) != NULL) {
 		add_history(input);
 		const char *p = input;
@@ -47,11 +79,11 @@ int main(int argc, char **argv)
 		}
 		switch (err.type) {
 		case err_t_ok:
-			print_expr(result);
-			putchar('\n');
+			print_expr(stdout, result);
+			fprintf(stdout, "\n");
 			break;
 		default:
-			puts(err.message);
+			fprintf(stderr, "%s\n", err.message);
 			break;
 		}
 	}

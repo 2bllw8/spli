@@ -6,8 +6,12 @@
 #ifndef SPLI_IO_H
 #define SPLI_IO_H
 
+#include <stdio.h>
+
 #include "atom.h"
 
-void print_expr(struct atom atom);
+void print_expr(FILE *file, struct atom atom);
+
+char *read_file(const char *path);
 
 #endif
