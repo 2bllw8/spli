@@ -10,5 +10,6 @@
 #include "err.h"
 
 error eval_expr(struct atom env, struct atom atom, struct atom *result);
+error apply(struct atom f, struct atom args, struct atom *result);
 
 #endif

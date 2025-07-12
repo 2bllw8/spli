@@ -59,6 +59,10 @@ void init_env(struct atom env)
 	env_set(env, make_sym(">"), make_builtin(builtin_integer_lt));
 	env_set(env, make_sym("<"), make_builtin(builtin_integer_gt));
 
+	env_set(env, make_sym("apply"), make_builtin(builtin_apply));
+
+	env_set(env, make_sym("are-same"), make_builtin(builtin_same));
+
 	load_file(env, "init.lisp");
 }
 
